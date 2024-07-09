@@ -1,2 +1,2 @@
-# masar
+# Masar
 Lightweight PHP router
