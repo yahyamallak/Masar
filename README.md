@@ -1,2 +1,2 @@
-# masar
-Light PHP router
+# Masar
+Lightweight PHP router
