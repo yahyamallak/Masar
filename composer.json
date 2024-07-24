@@ -1,0 +1,25 @@
+{
+    "name": "yahya/masar",
+    "description": "Lightweight PHP router",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Masar\\": "src/",
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "tests": "./vendor/bin/phpunit"
+    },
+    "authors": [
+        {
+            "name": "Yahya mallak",
+            "email": "Yahya10mallak@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require-dev": {
+        "phpunit/phpunit": "^11.3@dev"
+    }
+}
