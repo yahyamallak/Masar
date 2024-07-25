@@ -30,8 +30,6 @@ class Route {
 
         $path = $this->convertToRegex($request->getUrl());
 
-        var_dump($path);
-
         if(preg_match($path, $this->path)) {
             return true;
         }
