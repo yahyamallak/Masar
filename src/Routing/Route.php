@@ -3,7 +3,13 @@
 namespace Masar\Routing;
 use Masar\Http\Request;
 
-class Route { 
+class Route {
+
+    /**
+     * Contains route's parameters if there are any
+     * @var array
+     */
+    private array $params = [];
 
     /**
      * Constructs the route.
@@ -28,9 +34,17 @@ class Route {
             return false;
         }
 
-        $path = $this->convertToRegex($request->getUrl());
+        $path = $this->convertToRegex($this->path);
 
-        if(preg_match($path, $this->path)) {
+        if(preg_match($path, $request->getUrl(), $matches)) {
+
+            array_shift($matches);
+
+            $this->params = array_filter($matches, function ($match) {
+                return !is_numeric($match);
+            }, ARRAY_FILTER_USE_KEY);
+
+
             return true;
         }
 
@@ -45,7 +59,7 @@ class Route {
      * @return string
      */
     private function convertToRegex(string $path): string {
-        return '#^' . preg_replace('#{[\w]+}#','([\w]+)',$path) . '$#';
+        return '#^' . preg_replace('#{([\w]+)}#','(?<$1>[\w]+)',$path) . '$#';
     }
 
 
@@ -55,6 +69,6 @@ class Route {
      */
 
     public function execute(): void {
-        echo call_user_func($this->callback);
+        echo call_user_func_array($this->callback, $this->params);
     }
 }
