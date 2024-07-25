@@ -72,9 +72,11 @@ class Router {
      */
     public function dispatch(Request $request): void {
 
-
         foreach($this->routes as $route) {
+            
+            
             if($route->matches($request)) {
+
                 $route->execute();
                 return;
             }

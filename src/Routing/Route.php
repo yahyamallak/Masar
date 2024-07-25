@@ -30,6 +30,8 @@ class Route {
 
         $path = $this->convertToRegex($request->getUrl());
 
+        var_dump($path);
+
         if(preg_match($path, $this->path)) {
             return true;
         }
@@ -45,7 +47,7 @@ class Route {
      * @return string
      */
     private function convertToRegex(string $path): string {
-        return '#^' . preg_replace('#([\w]+)#','([\w]+)',$path) . '$#';
+        return '#^' . preg_replace('#{[\w]+}#','([\w]+)',$path) . '$#';
     }
 
 
