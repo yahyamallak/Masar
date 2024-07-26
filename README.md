@@ -14,7 +14,8 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 Clone this repository or download the files:
 
 ```bash
-git clone https://github.com/yahyamallak/Masar.git
+
+composer require yahyamallak/masar
 
 ```
 
