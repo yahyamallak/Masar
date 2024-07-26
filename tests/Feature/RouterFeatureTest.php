@@ -8,7 +8,7 @@ use PHPUnit\Framework\TestCase;
 class RouterFeatureTest extends TestCase {
 
 
-    public function testSimpleRouting() {
+    public function test_simple_routing() {
 
         $router = new Router();
 
@@ -47,26 +47,22 @@ class RouterFeatureTest extends TestCase {
     }
 
 
-    public function test_routes_with_parameters() {
+    public function test_routes_parameters_rules() {
         $router = new Router();
 
         $router->get('/posts/{id}', function($id) {
             return 'Hello from post : ' . $id;
-        });
+        })->where(["id"=>":number"]);
 
-        $post = "1";
+        $id = "post";
 
         $request = $this->createMock(Request::class);
-        $request->method('getUrl')->willReturn("/posts/{$post}");
+        $request->method('getUrl')->willReturn("/posts/{$id}");
         $request->method('getMethod')->willReturn('GET');
-
-
-        ob_start();
+        
+        $this->expectException(NotFoundException::class);
+        
         $router->dispatch($request);
-        $output = ob_get_clean();
-
-
-        $this->assertEquals("Hello from post : {$post}", $output);
     }
 
 }
