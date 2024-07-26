@@ -13,7 +13,7 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 Clone this repository or download the files:
 
 ```bash
-git clone https://github.com/yahyamallak/masar.git
+git clone https://github.com/yahyamallak/Masar.git
 
 ```
 
@@ -32,15 +32,15 @@ $router = new Router();
 
 // Define routes
 $router->get('/', function() {
-    echo "Welcome to the homepage!";
+    return "Welcome to the homepage!";
 });
 
 $router->get('/about', function() {
-    echo "About us page";
+    return "About us page";
 });
 
 $router->post('/submit', function() {
-    echo "Form submitted";
+    return "Form submitted";
 });
 
 // Create a request object
@@ -63,11 +63,11 @@ You can define dynamic segments in your routes using curly braces:
 ```php
 
 $router->get('/user/{id}', function($id) {
-    echo "User profile for user with ID: " . $id;
+    return "User profile for user with ID: " . $id;
 });
 
 $router->get('/post/{slug}', function($slug) {
-    echo "Displaying post: " . $slug;
+    return "Displaying post: " . $slug;
 });
 
 ```
@@ -86,7 +86,7 @@ $router->get('/post/{slug}', function($slug) {
 
 $router->get('/user/{id}', function($id) {
 
-    echo "User profile for user with ID: " . $id;
+    return "User profile for user with ID: " . $id;
 
 })->where(["id" => ":number"]);
 
