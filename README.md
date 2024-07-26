@@ -1,6 +1,12 @@
 # Masar
 A lightweight and flexible PHP router with support for dynamic route parameters.
 
+![PHP Version](https://img.shields.io/badge/php-%5E8.0-blue.svg)
+
+## Requirements
+
+- PHP 8.0 or higher
+
 ## Features
 
 - Simple and intuitive API
