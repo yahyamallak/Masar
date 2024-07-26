@@ -6,6 +6,7 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 - Simple and intuitive API
 - Support for GET and POST requests
 - Dynamic route parameters
+- Support for parameters rules
 - Easy to integrate and extend
 
 ## Installation
