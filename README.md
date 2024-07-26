@@ -11,7 +11,7 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 
 ## Installation
 
-Clone this repository or download the files:
+Run this command to install the library:
 
 ```bash
 
