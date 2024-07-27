@@ -6,37 +6,37 @@ use PHPUnit\Framework\TestCase;
 class ResponseTest extends TestCase 
 {
 
+    private $response;
+    public function setUp(): void {
+        $this->response = new Response();
+    }
 
     public function test_set_response_content() {
 
-        $response = new Response();
 
-        $response->content('Hello world');
+        $this->response->content('Hello world');
 
-        $this->assertEquals('Hello world', $response->getContent());
+        $this->assertEquals('Hello world', $this->response->getContent());
     }
 
 
     public function test_set_response_status_code() {
-        
-        $response = new Response();
+    
+        $this->response->status(200);
 
-        $response->status(200);
-
-        $this->assertEquals(200, $response->getStatus());
+        $this->assertEquals(200, $this->response->getStatus());
     }
 
 
     public function test_send_response() {
         
-        $response = new Response();
 
-        $response->content("Welcome to Masar");
-        $response->status(200);
+        $this->response->content("Welcome to Masar");
+        $this->response->status(200);
 
 
-        $this->assertEquals('Welcome to Masar', $response->getContent());
-        $this->assertEquals(200, $response->getStatus());
+        $this->assertEquals('Welcome to Masar', $this->response->getContent());
+        $this->assertEquals(200, $this->response->getStatus());
     }
 
 }

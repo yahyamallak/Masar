@@ -10,62 +10,49 @@ class RouteTest extends TestCase
 {
     use ReflectionTrait;
 
-    public function test_route_constructor() {
-        
-        $callback = function() {
+    private $route;
+
+    private $callback;
+
+    public function setUp(): void {
+        $this->callback = function() {
             return "Hello world";
         };
 
-        $route = new Route('GET', '/', $callback);
-
-        $this->assertEquals('GET', $this->getPrivateProperty($route, "method"));
-        $this->assertEquals('/', $this->getPrivateProperty($route, "path"));
-        $this->assertEquals($callback, $this->getPrivateProperty($route, "callback"));
+        $this->route = new Route('GET', '/', $this->callback);
+    }
+    public function test_route_constructor() {
+        
+        $this->assertEquals('GET', $this->getPrivateProperty($this->route, "method"));
+        $this->assertEquals('/', $this->getPrivateProperty($this->route, "path"));
+        $this->assertEquals($this->callback, $this->getPrivateProperty($this->route, "callback"));
 
     }
 
 
     public function test_route_matches() {
 
-        $callback = function() {
-            return "Hello world";
-        };
-
-        $route = new Route('GET', '/', $callback);
-
         $request = $this->createMock(Request::class);
         $request->method('getUrl')->willReturn('/');
         $request->method('getMethod')->willReturn('GET');
 
-        $this->assertTrue($route->matches($request));
+        $this->assertTrue($this->route->matches($request));
     }
 
     public function test_route_does_not_match() {
-
-        $callback = function() {
-            return "Hello world";
-        };
-
-        $route = new Route('GET', '/', $callback);
 
         $request = $this->createMock(Request::class);
         $request->method('getUrl')->willReturn('/test');
         $request->method('getMethod')->willReturn('GET');
 
-        $this->assertFalse($route->matches($request));
+        $this->assertFalse($this->route->matches($request));
     }
 
 
     public function test_execute_route() {
 
-        $callback = function() {
-            return "Hello world";
-        };
-
-        $route = new Route('GET', '/', $callback);
-
         ob_start();
-        $route->execute();
+        $this->route->execute();
         $output = ob_get_clean();
 
         $this->assertEquals("Hello world", $output);

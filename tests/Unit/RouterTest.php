@@ -10,9 +10,13 @@ class RouterTest extends TestCase
 {   
     use ReflectionTrait;
 
+    private $router;
+    public function setUp(): void {
+
+        $this->router = new Router();
+    }
+
     public function test_add_route_to_routes() {
-        
-        $router = new Router();
 
         $callback1 = function() {
             return "Hello GET";
@@ -22,15 +26,15 @@ class RouterTest extends TestCase
             return "Hello POST";
         };
 
-        $router->get('/', $callback1);
-        $router->post('/', $callback2);
+        $this->router->get('/', $callback1);
+        $this->router->post('/', $callback2);
 
         $routes = [
             0 => new Route('GET', '/', $callback1),
             1 => new Route('POST', '/', $callback2)
         ];
 
-        $this->assertEquals($routes, $this->getPrivateProperty($router, 'routes'));
+        $this->assertEquals($routes, $this->getPrivateProperty($this->router, 'routes'));
     }
 
 }
