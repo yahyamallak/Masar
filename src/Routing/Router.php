@@ -14,7 +14,7 @@ class Router {
     private array $routes = [];
 
     /**
-     * Adds a GET route into $routes array.
+     * Adds a GET request route into $routes array.
      * @param string $path
      * @param callable $callback
      * @return \Masar\Routing\Route
@@ -29,7 +29,7 @@ class Router {
     }
 
     /**
-     * Adds a POST route into $routes array.
+     * Adds a POST request route into $routes array.
      * @param string $path
      * @param callable $callback
      * @return \Masar\Routing\Route
@@ -37,6 +37,52 @@ class Router {
     public function post(string $path, callable $callback): Route {
         
         $route = $this->addRoute('POST', $path, $callback);
+        
+        $this->routes[] = $route;
+        return $route;
+    
+    }
+
+    
+    /**
+     * Adds a PUT request route into $routes array.
+     * @param string $path
+     * @param callable $callback
+     * @return \Masar\Routing\Route
+     */
+    public function put(string $path, callable $callback): Route {
+        
+        $route = $this->addRoute('PUT', $path, $callback);
+        
+        $this->routes[] = $route;
+        return $route;
+    
+    }
+
+    /**
+     * Adds a PATCH request route into $routes array.
+     * @param string $path
+     * @param callable $callback
+     * @return \Masar\Routing\Route
+     */
+    public function patch(string $path, callable $callback): Route {
+        
+        $route = $this->addRoute('PATCH', $path, $callback);
+        
+        $this->routes[] = $route;
+        return $route;
+    
+    }
+
+    /**
+     * Adds a DELETE request route into $routes array.
+     * @param string $path
+     * @param callable $callback
+     * @return \Masar\Routing\Route
+     */
+    public function delete(string $path, callable $callback): Route {
+        
+        $route = $this->addRoute('DELETE', $path, $callback);
         
         $this->routes[] = $route;
         return $route;
@@ -73,8 +119,7 @@ class Router {
     public function dispatch(Request $request): void {
 
         foreach($this->routes as $route) {
-            
-            
+
             if($route->matches($request)) {
 
                 $route->execute();

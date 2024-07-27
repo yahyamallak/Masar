@@ -47,6 +47,30 @@ class RouterFeatureTest extends TestCase {
     }
 
 
+    public function test_routes_with_parameters() {
+        
+        $router = new Router();
+
+        $router->get('/posts/{id}', function($id) {
+            return 'Hello from post : ' . $id;
+        });
+
+        $id = "5";
+
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/posts/{$id}");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Hello from post : {$id}", $output);
+    
+    
+    }
+
+
     public function test_routes_parameters_rules() {
         $router = new Router();
 

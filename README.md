@@ -10,7 +10,7 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 ## Features
 
 - Simple and intuitive API
-- Support for GET and POST requests
+- Support for ( GET / POST / PUT / PATCH / DELETE ) requests
 - Dynamic route parameters
 - Support for parameters rules
 - Easy to integrate and extend

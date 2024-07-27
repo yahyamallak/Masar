@@ -5,6 +5,10 @@ use Masar\Http\Request;
 
 class Route {
 
+    /**
+     * Contains the supported rules for parameters.
+     * @var array
+     */
     private array $rules = [
         ":digit" => "[0-9]",
         ":number" => "[0-9]+",
@@ -14,11 +18,15 @@ class Route {
     ];
 
     /**
-     * Contains route's parameters if there are any
+     * Contains route's parameters if there are any.
      * @var array
      */
     private array $params = [];
 
+    /**
+     * Contains rules for each parameter.
+     * @var array
+     */
     private array $paramRules = [];
 
     /**
@@ -38,35 +46,54 @@ class Route {
      */
     public function matches(Request $request): bool {
 
-        $method = $request->getMethod();
+        $method = $this->getRequestMethod($request);
         
-        if($method != $this->method) {
-            return false;
+        if($method == $this->method) {
+            
+            $path = $this->convertToRegex($this->path);
+
+            if(preg_match($path, $request->getUrl(), $matches)) {
+
+                $this->params = $this->filterMatches($matches);
+
+                return true;
+            }
         }
 
-        $path = $this->convertToRegex($this->path);
-
-        if(preg_match($path, $request->getUrl(), $matches)) {
-
-            array_shift($matches);
-
-            $this->params = array_filter($matches, function ($match) {
-                return !is_numeric($match);
-            }, ARRAY_FILTER_USE_KEY);
-
-
-            return true;
-        }
 
         return false;
 
     }
 
+    /**
+     * Adds rules to parameters.
+     * @param mixed $rules
+     * @return void
+     */
     public function where($rules) {
 
         foreach($rules as $param => $rule) {
             $this->paramRules[$param] = $rule;
         }
+    }
+
+
+    private function getRequestMethod(Request $request): string {
+        return $_POST["_method"] ?? $request->getMethod();;
+    }
+
+
+    /**
+     * Filters the matches array to get an associative array with key as name of parameter and value as the value of the parameter.
+     * @param array $matches
+     * @return array
+     */
+    private function filterMatches(array $matches): array {
+        array_shift($matches);
+
+        return array_filter($matches, function ($match) {
+                return !is_numeric($match);
+            }, ARRAY_FILTER_USE_KEY);
     }
 
 
@@ -77,12 +104,14 @@ class Route {
      */
     private function convertToRegex(string $path): string {
 
-        
-        foreach($this->paramRules as $param => $rule) {
-
-            $path = preg_replace("#{($param)}#", "(?<$1>{$this->rules[$rule]})", $path);
+        if(!empty($this->paramRules)) {
+            foreach($this->paramRules as $param => $rule) {
+                $path = preg_replace("#{($param)}#", "(?<$1>{$this->rules[$rule]})", $path);
+            }
+        } else {
+                $path = preg_replace("#{([\w_\-\s]+)}#", "(?<$1>[\w_\-\s]+)", $path);
         }
-        
+
         return '#^'. $path . '$#';
     }
 
