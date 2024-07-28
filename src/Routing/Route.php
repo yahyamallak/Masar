@@ -30,6 +30,12 @@ class Route {
     private array $paramRules = [];
 
     /**
+     * Contains named routes.
+     * @var array
+     */
+    private static array $namedRoutes = [];
+
+    /**
      * Constructs the route.
      * @param string $method
      * @param string $path
@@ -67,16 +73,32 @@ class Route {
 
     /**
      * Adds rules to parameters.
-     * @param mixed $rules
-     * @return void
+     * @param array $rules
+     * @return static
      */
-    public function where($rules) {
+    public function where(array $rules): static {
 
         foreach($rules as $param => $rule) {
             $this->paramRules[$param] = $rule;
         }
+
+        return $this;
     }
 
+
+    /**
+     * Sets route's name.
+     * @param string $name
+     * @return static
+     */
+    public function name(string $name): static {
+        self::$namedRoutes[$name] = $this->path;
+        return $this;
+    }
+
+    public static function get(string $name) {
+        return self::$namedRoutes[$name];
+    }
 
     private function getRequestMethod(Request $request): string {
         return $_POST["_method"] ?? $request->getMethod();;
@@ -122,6 +144,28 @@ class Route {
      */
 
     public function execute(): void {
-        echo call_user_func_array($this->callback, $this->params);
+
+        $callback = $this->callback;
+
+        if(is_callable($callback)) {
+
+            echo call_user_func_array($callback, $this->params);
+        
+        } else if(is_array($callback)) {
+
+            $controller = new $callback[0];
+            $action = $callback[1];
+
+            echo $controller->$action(...$this->params);
+        } else if(is_string($callback)) {
+
+           $callback = explode("@",$callback);
+            $controllerNamespace = Router::$controllerNamespace . $callback[0];
+            $action = $callback[1];
+
+            $controller = new $controllerNamespace;
+
+            echo $controller->$action(...$this->params);
+        }   
     }
 }

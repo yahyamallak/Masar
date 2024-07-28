@@ -5,7 +5,13 @@ namespace Masar\Routing;
 use Masar\Exceptions\NotFoundException;
 use Masar\Http\Request;
 
-class Router { 
+class Router {
+
+    /**
+     * Stores the controllers namespace.
+     * @var string
+     */
+    public static string $controllerNamespace;
 
     /**
      * Contains all the registered routes.
@@ -13,16 +19,26 @@ class Router {
      */
     private array $routes = [];
 
+
+    /**
+     * Gets the controllers namespace to access them easily.
+     * @param string $controllerNamespace
+     */
+    public function __construct(string $controllerNamespace = '') 
+    {
+        self::$controllerNamespace = $this->normalizeNamespace($controllerNamespace);
+    }
+
     /**
      * Adds a GET request route into $routes array.
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    public function get(string $path, callable $callback): Route {
+    public function get(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('GET', $path, $callback);
-        
+
         $this->routes[] = $route;
         return $route;
     
@@ -31,10 +47,10 @@ class Router {
     /**
      * Adds a POST request route into $routes array.
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    public function post(string $path, callable $callback): Route {
+    public function post(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('POST', $path, $callback);
         
@@ -47,10 +63,10 @@ class Router {
     /**
      * Adds a PUT request route into $routes array.
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    public function put(string $path, callable $callback): Route {
+    public function put(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('PUT', $path, $callback);
         
@@ -62,10 +78,10 @@ class Router {
     /**
      * Adds a PATCH request route into $routes array.
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    public function patch(string $path, callable $callback): Route {
+    public function patch(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('PATCH', $path, $callback);
         
@@ -77,10 +93,10 @@ class Router {
     /**
      * Adds a DELETE request route into $routes array.
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    public function delete(string $path, callable $callback): Route {
+    public function delete(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('DELETE', $path, $callback);
         
@@ -93,10 +109,10 @@ class Router {
      * Creates a route that will be added to the $routes array later.
      * @param string $method
      * @param string $path
-     * @param callable $callback
+     * @param callable|array|string $callback
      * @return \Masar\Routing\Route
      */
-    private function addRoute(string $method, string $path, callable $callback): Route {
+    private function addRoute(string $method, string $path, callable|array|string $callback): Route {
         return new Route($method, $this->normalizePath($path), $callback);
     }
 
@@ -107,6 +123,15 @@ class Router {
      */
     private function normalizePath(string $path): string {
         return '/' . trim($path, '/');
+    }
+
+    /**
+     * Normalizes the given namespace by trimming slashes and back-salshes to avoid errors.
+     * @param string $namespace
+     * @return string
+     */
+    private function normalizeNamespace(string $namespace): string {
+        return trim($namespace, '/\\') . '\\';
     }
 
 
