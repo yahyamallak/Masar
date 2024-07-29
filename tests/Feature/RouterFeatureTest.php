@@ -15,6 +15,14 @@ class HomeController {
     }
 }
 
+class AuthMiddleware {
+    public function handle($next) {
+        echo "Auth middleware ";
+
+        return $next();
+    }
+}
+
 class RouterFeatureTest extends TestCase {
 
     private $router;
@@ -228,6 +236,27 @@ class RouterFeatureTest extends TestCase {
         $output = ob_get_clean();
 
         $this->assertEquals("Hello post {$id} from controller", $output);
+    }
+
+
+    public function test_that_middleware_works() {
+
+        $config = [];
+
+        $router = new Router();
+
+        $router->get("/", [HomeController::class, "index"])
+               ->middleware("auth");
+        
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Auth middleware Hello from controller", $output);
     }
 
 }

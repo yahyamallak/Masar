@@ -36,6 +36,12 @@ class Route {
     private static array $namedRoutes = [];
 
     /**
+     * Contains route's middlewares.
+     * @var array
+     */
+    private array $middlewares = [];
+
+    /**
      * Constructs the route.
      * @param string $method
      * @param string $path
@@ -80,6 +86,22 @@ class Route {
 
         foreach($rules as $param => $rule) {
             $this->paramRules[$param] = $rule;
+        }
+
+        return $this;
+    }
+
+    public function middleware(string|array $middleware) {
+
+        $namespace = Router::$middlewareNamespace ?? "";
+
+        if(is_string($middleware)) {
+            $this->middlewares[$middleware] = new ( $namespace . ucfirst($middleware) . 'Middleware');
+        } else if(is_array($middleware)) {
+
+            foreach($middleware as $middlewareName) {
+                $this->middlewares[$middlewareName] = new ($namespace . ucfirst($middlewareName) . 'Middleware');
+            }
         }
 
         return $this;
@@ -145,27 +167,53 @@ class Route {
 
     public function execute(): void {
 
+        $next = null;
+
         $callback = $this->callback;
 
         if(is_callable($callback)) {
 
-            echo call_user_func_array($callback, $this->params);
+            $next = function () use($callback) {
+                return call_user_func_array($callback, $this->params);
+            }; 
         
         } else if(is_array($callback)) {
 
             $controller = new $callback[0];
             $action = $callback[1];
 
-            echo $controller->$action(...$this->params);
+            $next = function () use($controller, $action) {
+                return $controller->$action(...$this->params);
+            };
+            
         } else if(is_string($callback)) {
 
-           $callback = explode("@",$callback);
-            $controllerNamespace = Router::$controllerNamespace . $callback[0];
+            $namespace = Router::$controllerNamespace ?? "";
+
+            $callback = explode("@",$callback);
+            $controllerNamespace =  $namespace . $callback[0];
             $action = $callback[1];
 
             $controller = new $controllerNamespace;
 
-            echo $controller->$action(...$this->params);
-        }   
+            $next = function () use ($controller, $action) {
+                return $controller->$action(...$this->params);
+            };
+        }
+
+        $middlewares = $this->middlewares;
+        
+        if(!empty($middlewares)) {
+
+            $middlewaresStack = array_reduce(array_reverse($middlewares), function ($next, $middleware) {
+                return function () use ($middleware, $next) {
+                    return $middleware->handle($next);
+                };
+            }, $next);
+            
+            echo $middlewaresStack();
+        }else {
+            echo $next();
+        }
     }
 }

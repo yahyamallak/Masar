@@ -14,19 +14,25 @@ class Router {
     public static string $controllerNamespace;
 
     /**
+     * Stores the middlewares namespace.
+     * @var string
+     */
+    public static string $middlewareNamespace;
+
+    /**
      * Contains all the registered routes.
      * @var array
      */
     private array $routes = [];
 
 
-    /**
-     * Gets the controllers namespace to access them easily.
-     * @param string $controllerNamespace
-     */
-    public function __construct(string $controllerNamespace = '') 
+    
+    public function __construct(array $config = []) 
     {
-        self::$controllerNamespace = $this->normalizeNamespace($controllerNamespace);
+        if($config) {
+            self::$controllerNamespace = $this->normalizeNamespace($config["controllers"]);
+            self::$middlewareNamespace = $this->normalizeNamespace($config["middlewares"]);
+        }
     }
 
     /**
