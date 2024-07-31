@@ -3,6 +3,7 @@
 
 use Masar\Http\Request;
 use Masar\Routing\Route;
+use Masar\Routing\Router;
 use PHPUnit\Framework\TestCase;
 use Tests\ReflectionTrait;
 
@@ -48,6 +49,15 @@ class RouteTest extends TestCase
         $this->assertFalse($this->route->matches($request));
     }
 
+    public function test_named_routes() {
+        $router = new Router();
+
+        $router->get("/", function () {
+            return "Hello world";
+        })->name("home");
+
+        $this->assertEquals('/', Route::get("home"));
+    }
 
     public function test_execute_route() {
 

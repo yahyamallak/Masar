@@ -30,6 +30,18 @@ class Route {
     private array $paramRules = [];
 
     /**
+     * Contains named routes.
+     * @var array
+     */
+    private static array $namedRoutes = [];
+
+    /**
+     * Contains route's middlewares.
+     * @var array
+     */
+    private array $middlewares = [];
+
+    /**
      * Constructs the route.
      * @param string $method
      * @param string $path
@@ -67,16 +79,48 @@ class Route {
 
     /**
      * Adds rules to parameters.
-     * @param mixed $rules
-     * @return void
+     * @param array $rules
+     * @return static
      */
-    public function where($rules) {
+    public function where(array $rules): static {
 
         foreach($rules as $param => $rule) {
             $this->paramRules[$param] = $rule;
         }
+
+        return $this;
     }
 
+    public function middleware(string|array $middleware) {
+
+        $namespace = Router::$middlewareNamespace ?? "";
+
+        if(is_string($middleware)) {
+            $this->middlewares[$middleware] = new ( $namespace . ucfirst($middleware) . 'Middleware');
+        } else if(is_array($middleware)) {
+
+            foreach($middleware as $middlewareName) {
+                $this->middlewares[$middlewareName] = new ($namespace . ucfirst($middlewareName) . 'Middleware');
+            }
+        }
+
+        return $this;
+    }
+
+
+    /**
+     * Sets route's name.
+     * @param string $name
+     * @return static
+     */
+    public function name(string $name): static {
+        self::$namedRoutes[$name] = $this->path;
+        return $this;
+    }
+
+    public static function get(string $name) {
+        return self::$namedRoutes[$name];
+    }
 
     private function getRequestMethod(Request $request): string {
         return $_POST["_method"] ?? $request->getMethod();;
@@ -122,6 +166,54 @@ class Route {
      */
 
     public function execute(): void {
-        echo call_user_func_array($this->callback, $this->params);
+
+        $next = null;
+
+        $callback = $this->callback;
+
+        if(is_callable($callback)) {
+
+            $next = function () use($callback) {
+                return call_user_func_array($callback, $this->params);
+            }; 
+        
+        } else if(is_array($callback)) {
+
+            $controller = new $callback[0];
+            $action = $callback[1];
+
+            $next = function () use($controller, $action) {
+                return $controller->$action(...$this->params);
+            };
+            
+        } else if(is_string($callback)) {
+
+            $namespace = Router::$controllerNamespace ?? "";
+
+            $callback = explode("@",$callback);
+            $controllerNamespace =  $namespace . $callback[0];
+            $action = $callback[1];
+
+            $controller = new $controllerNamespace;
+
+            $next = function () use ($controller, $action) {
+                return $controller->$action(...$this->params);
+            };
+        }
+
+        $middlewares = $this->middlewares;
+        
+        if(!empty($middlewares)) {
+
+            $middlewaresStack = array_reduce(array_reverse($middlewares), function ($next, $middleware) {
+                return function () use ($middleware, $next) {
+                    return $middleware->handle($next);
+                };
+            }, $next);
+            
+            echo $middlewaresStack();
+        }else {
+            echo $next();
+        }
     }
 }

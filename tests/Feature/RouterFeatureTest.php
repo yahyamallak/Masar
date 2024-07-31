@@ -5,6 +5,24 @@ use Masar\Http\Request;
 use Masar\Routing\Router;
 use PHPUnit\Framework\TestCase;
 
+class HomeController {
+    public function index() {
+        return "Hello from controller";
+    }
+
+    public function show($id) {
+        return "Hello post {$id} from controller";
+    }
+}
+
+class AuthMiddleware {
+    public function handle($next) {
+        echo "Auth middleware ";
+
+        return $next();
+    }
+}
+
 class RouterFeatureTest extends TestCase {
 
     private $router;
@@ -166,6 +184,79 @@ class RouterFeatureTest extends TestCase {
         $this->expectException(NotFoundException::class);
         
         $this->router->dispatch($request);
+    }
+
+
+    public function test_that_controller_array_works() {
+
+        $this->router->get('/', [HomeController::class, 'index']);
+
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $this->router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Hello from controller", $output);
+    }
+
+    public function test_that_controller_string_works() {
+
+        $router = new Router();
+
+        $router->get('/', "HomeController@index");
+
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Hello from controller", $output);
+    }
+
+    public function test_that_controller_with_params_works() {
+
+
+
+        $this->router->get('/posts/{id}', [HomeController::class, 'show']);
+
+        $id = 10;
+
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/posts/{$id}");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $this->router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Hello post {$id} from controller", $output);
+    }
+
+
+    public function test_that_middleware_works() {
+
+        $config = [];
+
+        $router = new Router();
+
+        $router->get("/", [HomeController::class, "index"])
+               ->middleware("auth");
+        
+        $request = $this->createMock(Request::class);
+        $request->method('getUrl')->willReturn("/");
+        $request->method('getMethod')->willReturn('GET');
+
+        ob_start();
+        $router->dispatch($request);
+        $output = ob_get_clean();
+
+        $this->assertEquals("Auth middleware Hello from controller", $output);
     }
 
 }
