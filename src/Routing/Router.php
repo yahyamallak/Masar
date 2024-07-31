@@ -26,6 +26,9 @@ class Router {
     private array $routes = [];
 
 
+    private array $groupStack = [];
+
+
     
     public function __construct(array $config = []) 
     {
@@ -43,7 +46,10 @@ class Router {
      */
     public function get(string $path, callable|array|string $callback): Route {
         
+        
         $route = $this->addRoute('GET', $path, $callback);
+
+        $this->addMiddlewares($route);
 
         $this->routes[] = $route;
         return $route;
@@ -59,6 +65,8 @@ class Router {
     public function post(string $path, callable|array|string $callback): Route {
         
         $route = $this->addRoute('POST', $path, $callback);
+        
+        $this->addMiddlewares($route);
         
         $this->routes[] = $route;
         return $route;
@@ -76,6 +84,8 @@ class Router {
         
         $route = $this->addRoute('PUT', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -91,6 +101,8 @@ class Router {
         
         $route = $this->addRoute('PATCH', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -103,9 +115,11 @@ class Router {
      * @return \Masar\Routing\Route
      */
     public function delete(string $path, callable|array|string $callback): Route {
-        
+
         $route = $this->addRoute('DELETE', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -120,6 +134,20 @@ class Router {
      */
     private function addRoute(string $method, string $path, callable|array|string $callback): Route {
         return new Route($method, $this->normalizePath($path), $callback);
+    }
+
+    /**
+     * Adds middlewares to each route in the route grouping.
+     * @param \Masar\Routing\Route $route
+     * @return void
+     */
+    private function addMiddlewares(Route $route) {
+
+        $middlewares = $this->groupStack["middleware"] ?? [];
+        
+        if(!empty($middlewares)) {
+            $route->middleware($middlewares);
+        }
     }
 
     /**
@@ -138,6 +166,28 @@ class Router {
      */
     private function normalizeNamespace(string $namespace): string {
         return trim($namespace, '/\\') . '\\';
+    }
+
+
+    /**
+     * adds middlewares to the stack.
+     * @param string|array $middleware
+     * @return Router
+     */
+    public function middleware(string|array $middleware): static {
+        $this->groupStack["middleware"] = $middleware;
+        return $this;
+    }
+
+
+    /**
+     * Groups routes under a common prefix and applies shared middleware.
+     * @param callable $callback
+     * @return void
+     */
+    public function group(callable $callback) {
+        call_user_func($callback);
+        array_pop($this->groupStack);
     }
 
 
