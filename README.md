@@ -196,6 +196,51 @@ $router->get("/admin", function() {
 
 ```
 
+### 7. Using route grouping
+
+Example 1 :
+
+```php
+
+$router->middleware("auth")->group(function() use($router) {
+    
+    $router->get("/", [HomeController::class, "index"]);
+
+    $router->get("/about", [AboutController::class, "index"]);
+
+});
+
+```
+
+Example 2 :
+
+```php
+
+$router->middleware(["auth", "role"])->group(function() use($router) {
+    
+    $router->get("/", [HomeController::class, "index"]);
+
+    $router->get("/profile", [UserController::class, "profile"]);
+
+});
+
+```
+
+Example 3 :
+
+```php
+
+$router->prefix("admin")->group(function() use($router) {
+    
+    $router->get("/", [AdminController::class, "index"]);
+
+    $router->get("/settings", [AdminController::class, "settings"]);
+
+});
+
+```
+
+
 ## Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
