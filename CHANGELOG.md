@@ -1,11 +1,46 @@
 # Changelog
 All notable changes to Masar will be documented in this file.
 
+## [1.1.0] - 2024-08-1
+### Added
+- Support for route grouping.
+
+### Changed
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Fixed
+- N/A
+
+### Security
+- N/A
+
+
 ## [1.0.0] - 2024-07-31
 ### Added
 - Support for named routes.
 - Support for controllers.
 - Support for middlewares.
+
+### Changed
+- N/A
+
+### Deprecated
+- N/A
+
+### Removed
+- N/A
+
+### Fixed
+- N/A
+
+### Security
+- N/A
 
 
 
