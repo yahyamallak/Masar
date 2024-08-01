@@ -26,7 +26,18 @@ class Router {
     private array $routes = [];
 
 
+    /**
+     * Contains the prefix and middlewares of the route grouping.
+     * @var array
+     */
+    private array $groupStack = [];
+
+
     
+    /**
+     * Gets and sets the namespace of the controllers and middlewares.
+     * @param array $config
+     */
     public function __construct(array $config = []) 
     {
         if($config) {
@@ -42,8 +53,12 @@ class Router {
      * @return \Masar\Routing\Route
      */
     public function get(string $path, callable|array|string $callback): Route {
+
+        $path = $this->addPrefix($path);
         
         $route = $this->addRoute('GET', $path, $callback);
+
+        $this->addMiddlewares($route);
 
         $this->routes[] = $route;
         return $route;
@@ -58,7 +73,11 @@ class Router {
      */
     public function post(string $path, callable|array|string $callback): Route {
         
+        $path = $this->addPrefix($path);
+
         $route = $this->addRoute('POST', $path, $callback);
+        
+        $this->addMiddlewares($route);
         
         $this->routes[] = $route;
         return $route;
@@ -74,8 +93,12 @@ class Router {
      */
     public function put(string $path, callable|array|string $callback): Route {
         
+        $path = $this->addPrefix($path);
+
         $route = $this->addRoute('PUT', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -89,8 +112,12 @@ class Router {
      */
     public function patch(string $path, callable|array|string $callback): Route {
         
+        $path = $this->addPrefix($path);
+
         $route = $this->addRoute('PATCH', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -103,9 +130,13 @@ class Router {
      * @return \Masar\Routing\Route
      */
     public function delete(string $path, callable|array|string $callback): Route {
-        
+
+        $path = $this->addPrefix($path);
+
         $route = $this->addRoute('DELETE', $path, $callback);
         
+        $this->addMiddlewares($route);
+
         $this->routes[] = $route;
         return $route;
     
@@ -120,6 +151,37 @@ class Router {
      */
     private function addRoute(string $method, string $path, callable|array|string $callback): Route {
         return new Route($method, $this->normalizePath($path), $callback);
+    }
+
+
+    /**
+     * Adds prefix to the path.
+     * @param string $path
+     * @return string
+     */
+    private function addPrefix(string $path): string {
+
+        $prefix = $this->groupStack["prefix"] ?? "";
+
+        if($prefix) {
+            return $this->normalizePath($prefix) . $path;
+        }
+
+        return $path;
+    }
+
+    /**
+     * Adds middlewares to each route in the route grouping.
+     * @param \Masar\Routing\Route $route
+     * @return void
+     */
+    private function addMiddlewares(Route $route) {
+
+        $middlewares = $this->groupStack["middleware"] ?? [];
+        
+        if(!empty($middlewares)) {
+            $route->middleware($middlewares);
+        }
     }
 
     /**
@@ -138,6 +200,38 @@ class Router {
      */
     private function normalizeNamespace(string $namespace): string {
         return trim($namespace, '/\\') . '\\';
+    }
+
+
+    /**
+     * adds middlewares to the stack.
+     * @param string|array $middleware
+     * @return Router
+     */
+    public function middleware(string|array $middleware): static {
+        $this->groupStack["middleware"] = $middleware;
+        return $this;
+    }
+
+
+    /**
+     * Adds the prefix into the group stack of the route grouping.
+     * @param string $prefix
+     * @return Router
+     */
+    public function prefix(string $prefix):static {
+        $this->groupStack["prefix"] = $prefix;
+        return $this;
+    }
+
+    /**
+     * Groups routes under a common prefix and applies shared middleware.
+     * @param callable $callback
+     * @return void
+     */
+    public function group(callable $callback) {
+        call_user_func($callback);
+        $this->groupStack = [];
     }
 
 

@@ -3,5 +3,5 @@
 namespace Masar\Middleware;
 
 interface MiddlewareInterface {
-    public function handle(callable $next) {}
+    public function handle(callable $next);
 }

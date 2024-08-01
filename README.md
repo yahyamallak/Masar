@@ -14,6 +14,9 @@ A lightweight and flexible PHP router with support for dynamic route parameters.
 - Dynamic route parameters
 - Support for parameters rules
 - Easy to integrate and extend
+- Support for named routes
+- Support for controllers
+- Support for middlewares 
 
 ## Installation
 
@@ -49,6 +52,18 @@ $router->get('/about', function() {
 
 $router->post('/submit', function() {
     return "Form submitted";
+});
+
+$router->put('/users/{id}/change', function() {
+    return "User " . $id . " has been edited.";
+});
+
+$router->patch('/users/{id}/edit', function($id) {
+    return "edit name of user : " . $id;
+});
+
+$router->delete('/users/{id}/delete', function($id) {
+    return "delete user " . $id;
 });
 
 // Create a request object
@@ -97,6 +112,87 @@ $router->get('/user/{id}', function($id) {
     return "User profile for user with ID: " . $id;
 
 })->where(["id" => ":number"]);
+
+```
+
+### 4. Using Named Routes
+
+#### naming the route : 
+
+```php
+
+$router->get('/users', function() {
+
+    return "All users.";
+
+})->name("users");
+
+```
+
+#### getting the route name :
+
+```php
+
+use Masar\Routing\Router;
+
+Route::get("users");
+
+```
+
+### 5. Using Controllers
+
+#### Before using controllers you need to go through some quick steps to tell the router where to find them.
+
+#### Step 1 : Create a config file or just an array with some configuration.
+
+You create an associative array with keys ( controllers | middlewares ) and as values you put their namespaces.
+
+```php
+
+$config = [
+    "controllers" => "App\Controllers",
+    "middlewares" => "App\Middlewares"
+];
+
+```
+
+#### Step 2 : You pass the configuration to the router.
+
+All you got to do is to give the config array to the router and it will handle the rest.
+
+```php
+
+$router = new Router($config);
+
+```
+
+#### Step 3 : You define the routes with controllers
+
+##### Example 1 :
+
+```php
+
+$router->get('/profile/{id}', [UserController::class, "index"]);
+
+```
+
+##### Example 2 :
+
+```php
+
+$router->patch('/posts/{id}/edit', "PostController@edit");
+
+```
+
+### 6. Using Middlewares
+
+```php
+
+$router->get("/admin", function() {
+    
+    return "Admin dahsboard.";
+
+})->middleware("auth");
 
 ```
 
