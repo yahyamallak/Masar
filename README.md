@@ -54,7 +54,7 @@ $router->post('/submit', function() {
     return "Form submitted";
 });
 
-$router->put('/users/{id}/change', function() {
+$router->put('/users/{id}/change', function($id) {
     return "User " . $id . " has been edited.";
 });
 
@@ -72,8 +72,8 @@ $request = new Request();
 // Dispatch the router
 try {
     $router->dispatch($request);
-} catch (Exception $e) {
-    echo '404 Not Found';
+} catch (NotFoundException $e) {
+    echo $e->getMessage();
 }
 
 ```
@@ -133,7 +133,7 @@ $router->get('/users', function() {
 
 ```php
 
-use Masar\Routing\Router;
+use Masar\Routing\Route;
 
 Route::get("users");
 
