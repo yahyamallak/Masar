@@ -36,6 +36,7 @@ composer require yahyamallak/masar
 
 require_once dirname(__DIR__) . "/vendor/autoload.php";
 
+use Masar\Exceptions\NotFoundException;
 use Masar\Http\Request;
 use Masar\Routing\Router;
 
